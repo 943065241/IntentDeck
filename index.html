@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10110f">
+  <title>Mindspace · 思维画布</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#canvas">跳到画布</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-button" id="sidebarToggle" aria-label="显示或隐藏左侧栏" title="显示或隐藏左侧栏 (Ctrl+B)">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
+        </button>
+        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <strong class="brand-name">Mindspace</strong>
+        <button class="help-button" id="aboutButton" type="button" aria-label="了解 Mindspace" title="了解 Mindspace">?</button>
+        <span class="topbar-separator"></span>
+        <button class="document-title" id="documentTitle" title="重命名工程">产品体验地图</button>
+        <nav class="canvas-navigation" aria-label="画布路径">
+          <button class="canvas-back" id="canvasBack" type="button" aria-label="返回上级画布" title="返回上级画布">←</button>
+          <div class="canvas-breadcrumbs" id="canvasBreadcrumbs"></div>
+        </nav>
+        <span class="save-state" id="saveState"><i></i> 已保存</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="button ghost" id="undoButton" title="撤销 (Ctrl+Z)" aria-label="撤销">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 7 4 12l5 5"/><path d="M4 12h9a6 6 0 0 1 6 6"/></svg>
+        </button>
+        <button class="button ghost" id="redoButton" title="重做 (Ctrl+Shift+Z)" aria-label="重做">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 7 5 5-5 5"/><path d="M20 12h-9a6 6 0 0 0-6 6"/></svg>
+        </button>
+        <button class="button secondary" id="saveButton" title="保存工程 (Ctrl+S)">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 4h12l2 2v14H5z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></svg>
+          保存
+        </button>
+      </div>
+    </header>
+
+    <div class="workspace" id="workspace">
+      <aside class="sidebar" id="sidebar" aria-label="工作区导航">
+        <nav class="rail" aria-label="主要栏目">
+          <button class="rail-item active" data-panel="projects" aria-label="工程" title="工程">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 6.5h6l2 2h10v10H3z"/></svg><span>工程</span>
+          </button>
+          <button class="rail-item" data-panel="canvases" aria-label="画布" title="画布">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="6" width="14" height="12" rx="2"/><path d="M8 3h12v12"/></svg><span>画布</span>
+          </button>
+          <button class="rail-item" data-panel="contracts" aria-label="合约" title="合约">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 3h10v18H7z"/><path d="M10 8h4M10 12h4M10 16h2"/></svg><span>合约</span>
+          </button>
+          <button class="rail-item" data-panel="documents" aria-label="文档" title="文档">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M9 11h6M9 15h6"/></svg><span>文档</span>
+          </button>
+          <button class="rail-item" data-panel="outline" aria-label="大纲" title="大纲">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg><span>大纲</span>
+          </button>
+          <div class="rail-spacer"></div>
+          <button class="rail-item" data-panel="settings" aria-label="设置" title="设置">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a8 8 0 0 0-1.7-1L14.5 3h-4L10 6a8 8 0 0 0-1.7 1L6 6 4 9.4 6 11a7 7 0 0 0 0 2l-2 1.6L6 18l2.3-1a8 8 0 0 0 1.7 1l.5 3h4l.4-3a8 8 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6a7 7 0 0 0 0-1Z"/></svg><span>设置</span>
+          </button>
+        </nav>
+
+        <section class="sidebar-panel" aria-live="polite">
+          <div class="panel-heading"><h2 id="panelTitle">工程</h2><button class="icon-button small" id="panelClose" aria-label="关闭左侧栏"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17"/></svg></button></div>
+          <div id="panelContent"></div>
+        </section>
+      </aside>
+
+      <aside class="contract-drawer" id="contractDrawer" aria-label="合约编辑" aria-hidden="true">
+        <div class="contract-drawer-header">
+          <div><span class="eyebrow">CONTRACT</span><h2 id="contractDrawerTitle">编辑合约</h2></div>
+          <button class="icon-button small" id="contractDrawerClose" type="button" aria-label="关闭合约编辑"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17"/></svg></button>
+        </div>
+        <div class="contract-drawer-content" id="contractDrawerContent"></div>
+      </aside>
+
+      <main class="canvas-wrap" id="canvas" tabindex="0" aria-label="思维导图画布">
+        <div class="canvas-tabs" id="canvasTabs" role="tablist" aria-label="已打开的画布"></div>
+        <div class="canvas-grid"></div>
+        <div class="selection-box" id="selectionBox" hidden></div>
+        <div class="selection-badge" id="selectionBadge" hidden></div>
+        <div class="canvas-stage" id="stage">
+          <svg class="connections" id="connections" aria-hidden="true"></svg>
+          <div class="connection-labels" id="connectionLabels"></div>
+          <div id="nodesLayer"></div>
+          <svg class="connections connection-overlay" id="connectionOverlay" aria-hidden="true"></svg>
+        </div>
+        <div class="canvas-tooltip-layer" id="nodeTooltipLayer"><div class="node-tooltip-portal" id="nodeTooltipPortal" role="tooltip" hidden></div></div>
+
+        <div class="canvas-hint" id="canvasHint"><kbd>拖动空白处</kbd> 框选 <span></span><kbd>中键 / Space</kbd> 平移画布</div>
+        <div class="zoom-control" aria-label="缩放控制">
+          <button id="zoomOut" aria-label="缩小">−</button>
+          <button id="zoomValue" title="重置缩放">100%</button>
+          <button id="zoomIn" aria-label="放大">＋</button>
+          <span></span>
+          <button id="fitView" aria-label="适应画布" title="适应画布">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+          </button>
+        </div>
+      </main>
+
+      <aside class="inspector" id="inspector" aria-label="节点 Inspector" aria-hidden="true">
+        <div class="inspector-header">
+          <div><span class="eyebrow">INSPECTOR</span><h2 id="inspectorTitle">节点属性</h2></div>
+          <button class="icon-button small" id="inspectorClose" aria-label="关闭 Inspector"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17"/></svg></button>
+        </div>
+        <div class="inspector-scroll" id="nodeInspectorContent">
+          <section class="property-section">
+            <label for="nodeText">标题</label>
+            <textarea id="nodeText" rows="3" maxlength="80"></textarea>
+            <div class="field-meta"><span>节点显示文本</span><span id="textCount">0 / 80</span></div>
+          </section>
+          <section class="property-section">
+            <label for="nodeNote">备注说明</label>
+            <textarea id="nodeNote" rows="5" placeholder="添加背景、上下文或待办…"></textarea>
+          </section>
+          <section class="property-section node-contract-section">
+            <div class="field-label-row">
+              <span class="field-label">引用合约</span>
+              <button class="contract-add-button" id="addNodeContract" type="button" aria-label="添加引用合约" aria-expanded="false" title="添加引用合约">＋</button>
+            </div>
+            <div class="node-contract-refs" id="nodeContractRefs"></div>
+            <div class="contract-picker" id="nodeContractPicker" hidden></div>
+            <label for="nodeAiPrompt">自定义合约文本</label>
+            <textarea id="nodeAiPrompt" rows="6" placeholder="添加仅适用于当前节点的目标、规则、输入与输出要求…"></textarea>
+          </section>
+          <section class="property-section">
+            <span class="field-label">外观</span>
+            <div class="color-row" id="colorRow" role="radiogroup" aria-label="节点颜色"></div>
+          </section>
+          <section class="property-section two-column">
+            <label>结构 <select id="nodeShape"><option value="rounded">圆角</option><option value="pill">胶囊</option><option value="square">方形</option></select></label>
+            <label>优先级 <select id="nodePriority"><option value="none">无</option><option value="high">高</option><option value="medium">中</option><option value="low">低</option></select></label>
+          </section>
+          <section class="property-section">
+            <span class="field-label">尺寸</span>
+            <div class="two-column size-fields">
+              <label>宽度 <input id="nodeWidth" type="number" min="112" max="420" step="1"></label>
+              <label>高度 <input id="nodeHeight" type="number" min="44" max="240" step="1"></label>
+            </div>
+            <button class="inline-action" id="resetNodeSize">自适应内容</button>
+          </section>
+          <section class="property-section node-canvas-section">
+            <span class="field-label">节点画布</span>
+            <p class="inspector-tip" id="nodeCanvasStatus">此节点尚未绑定子画布。</p>
+            <button class="inline-action" id="createNodeCanvas">创建子画布</button>
+            <button class="inline-action" id="openNodeCanvas" hidden>进入子画布</button>
+            <button class="inline-action danger" id="deleteNodeCanvas" hidden>删除子画布</button>
+          </section>
+          <section class="property-section action-list">
+            <button id="addChild"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>添加子节点<small>Tab</small></span></button>
+            <button id="duplicateNode"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg><span>创建副本<small>Ctrl+D</small></span></button>
+            <button class="danger" id="deleteNode"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14"/></svg><span>删除节点<small>Delete</small></span></button>
+          </section>
+          <section class="property-section node-info"><span>ID</span><code id="nodeId"></code><span>更新于</span><time id="nodeUpdated"></time></section>
+        </div>
+        <div class="inspector-scroll" id="connectionInspectorContent" hidden>
+          <section class="property-section">
+            <label for="connectionTitle">标题</label>
+            <textarea id="connectionTitle" rows="2" maxlength="80" placeholder="输入连线标题"></textarea>
+            <div class="field-meta"><span>显示在线路中部</span><span id="connectionTextCount">0 / 80</span></div>
+          </section>
+          <section class="property-section">
+            <label for="connectionNote">备注说明</label>
+            <textarea id="connectionNote" rows="4" placeholder="添加连线说明或上下文…"></textarea>
+          </section>
+          <section class="property-section">
+            <span class="field-label">预览</span>
+            <div class="connection-preview"><span id="connectionPreviewLine"></span></div>
+          </section>
+          <section class="property-section">
+            <label for="connectionColor">颜色</label>
+            <input id="connectionColor" type="color" value="#4a4d44">
+          </section>
+          <section class="property-section">
+            <label for="connectionStyle">线型</label>
+            <select id="connectionStyle"><option value="solid">实线</option><option value="dashed">虚线</option><option value="dotted">点线</option></select>
+          </section>
+          <section class="property-section">
+            <label for="connectionArrow">箭头</label>
+            <select id="connectionArrow"><option value="none">无箭头</option><option value="end">终点箭头</option><option value="start">起点箭头</option><option value="both">双向箭头</option></select>
+          </section>
+          <section class="property-section connection-endpoints">
+            <span>起点</span><strong id="connectionFrom"></strong>
+            <span>终点</span><strong id="connectionTo"></strong>
+          </section>
+          <section class="property-section">
+            <button class="inline-action" id="resetConnectionStyle">恢复默认连线</button>
+            <button class="inline-action danger" id="deleteConnection">删除连线</button>
+          </section>
+        </div>
+      </aside>
+    </div>
+    <dialog class="about-dialog" id="aboutDialog" aria-labelledby="aboutDialogTitle">
+      <div class="about-dialog-shell">
+        <header class="about-dialog-header">
+          <div><span class="eyebrow">ABOUT</span><h2 id="aboutDialogTitle">关于 Mindspace</h2></div>
+          <button class="icon-button small" id="aboutDialogClose" type="button" aria-label="关闭说明"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17"/></svg></button>
+        </header>
+        <div class="about-dialog-content">
+          <p class="about-lead">Mindspace 是一个面向复杂项目的可视化思维工作区。它把想法组织成节点与连线，并通过多级画布和可复用合约，让结构、背景信息与 AI 执行规则保存在同一个工程中。</p>
+          <div class="about-feature-grid">
+            <section><h3>多级画布</h3><p>每个工程包含一个主画布和若干子画布。节点可绑定子画布，并继续向下拆分；可通过节点、页签和画布列表快速跳转。</p></section>
+            <section><h3>节点与关系</h3><p>节点支持标题、备注说明、颜色、形状、尺寸和优先级。可框选、复制粘贴、自由移动，并从上下左右连接点主动建立关系。</p></section>
+            <section><h3>可编辑连线</h3><p>连线支持标题、备注、颜色、线型与箭头。线头可以拖动到其他节点重新连接，选中后可直接删除。</p></section>
+            <section><h3>AI 合约</h3><p>合约库按类目管理可复用 Prompt。节点既能引用多个合约，也能补充专属合约文本；右下角角标可快速预览完整内容。</p></section>
+            <section><h3>项目文件</h3><p>支持新建、打开、保存和另存为工程。修改会自动保存到当前浏览器；打开过的工程也会出现在最近使用列表中。</p></section>
+            <section><h3>专注画布操作</h3><p>双击空白处新建节点，中键或 Space 拖动画布，拖动空白区域框选，滚轮缩放。悬停节点可突出显示关联节点与连线。</p></section>
+          </div>
+          <section class="about-shortcuts" aria-label="常用快捷键">
+            <h3>常用快捷键</h3>
+            <div><span><kbd>Ctrl</kbd> + <kbd>S</kbd> 保存</span><span><kbd>Ctrl</kbd> + <kbd>C / V</kbd> 复制与粘贴</span><span><kbd>Delete</kbd> 删除选中项</span><span><kbd>Space</kbd> + 拖动 平移画布</span></div>
+          </section>
+          <div class="about-dialog-footer"><span>合约用于保存规则与上下文，为后续 AI 理解和执行节点任务做准备。</span><button class="button primary" id="aboutDialogConfirm" type="button">开始使用</button></div>
+        </div>
+      </div>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <input type="file" id="fileInput" accept="application/json,.json,.mindspace.json" hidden>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
